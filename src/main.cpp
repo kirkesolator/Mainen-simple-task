@@ -21,4 +21,5 @@ void loop() {
     Serial.println(time);
     Serial.println("Test");
     Serial.println("Test");
+    Serial.println("Test3");
 }
