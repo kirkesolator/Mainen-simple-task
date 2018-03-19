@@ -22,4 +22,5 @@ void loop() {
     Serial.println("Test");
     Serial.println("Test");
     Serial.println("Test3");
+    Serial.println("Test2");
 }
