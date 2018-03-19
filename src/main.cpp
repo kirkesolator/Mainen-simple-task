@@ -7,6 +7,7 @@ void setup() {
     Serial.begin(9600);
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.println("Hello Computer");
+    Serial.println("Hello Computer");
 }
 
 void loop() {
@@ -20,5 +21,6 @@ void loop() {
     Serial.println(time);
     Serial.println("Test");
     Serial.println("Test");
+    Serial.println("Test3");
     Serial.println("Test2");
 }
