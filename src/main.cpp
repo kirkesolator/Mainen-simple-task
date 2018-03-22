@@ -1,26 +1,44 @@
 #include <Arduino.h>
 
-unsigned long time;
+int pokePin = 9;
+int val;
+int valO;
+int pokeNum = 0;
+int timer;
+
+/*
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+*/
 
 void setup() {
     // put your setup code here, to run once:
     Serial.begin(9600);
-    pinMode(LED_BUILTIN, OUTPUT);
-    Serial.println("Hello Computer");
-    Serial.println("Hello Computer");
+    pinMode(pokePin, INPUT);
+    Serial.println("Script running");
 }
+
+/*
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+*/
 
 void loop() {
     // put your main code here, to run repeatedly:
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(1000);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(1000);
-    Serial.print("Time: ");
-    time = micros();
-    Serial.println(time);
-    Serial.println("Test");
-    Serial.println("Test");
-    Serial.println("Test3");
-    Serial.println("Test2");
+    valO = val; // store previous poke state
+    val = digitalRead(pokePin); // record new poke state
+    // delay(50);
+    if (val-valO < 0)
+    {
+      pokeNum = pokeNum + 1;
+      Serial.println(pokeNum);
+      // timer = millis();
+      // while (millis() - timer < 50) {
+      //   // Waiting...
+      // }
+    }
 }
