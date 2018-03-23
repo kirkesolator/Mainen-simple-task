@@ -30,9 +30,7 @@ int odorDuration = 500;
 int rewardDelay = 250;
 int rewardDuration = 100;
 int rewardID;
-char rewardStr[] = "Left"
-"Right"
-"None";
+char* rewardStr[]={"Left", "Right", "None"};
 
 // Timer variables
 int timerStart;
@@ -66,7 +64,7 @@ void setup() {
     while (! Serial);
 
     // Verify
-    Serial.println("Script running");
+    Serial.println("Block start");
 }
 
 //----------------------------------LOOP----------------------------------------
@@ -80,8 +78,7 @@ void loop() {
     //..................Poke Detection..................
     if (pokeState-pokeStateP < 0) {
       pokeNum = pokeNum + 1; // Update poke counter
-      Serial.print("Poke #"); // Print to serial monitor
-      Serial.println(pokeNum);
+      Serial.print("."); // Print to serial monitor
       pokeIn = millis(); // Record poke entry
     }
     else if (pokeState-pokeStateP > 0) { // Record poke exit
@@ -106,9 +103,13 @@ void loop() {
       case 1: // ITI
         pokeNum = 0;
         trialN = trialN + 1;
-        Serial.print("Trial #: "); // Print state to serial monitor
-        Serial.println(trialN); // Print state to serial monitor
-        Serial.println("State 1: ITI"); // Print state to serial monitor
+        if (trialN > nTrials) { // Break statement if number of trials have been reached
+          Serial.println("Block finished"); // Print state to serial monitor
+          break;
+        }
+        Serial.print("\nTrial #: "); // Print state to serial monitor
+        Serial.print(trialN); // Print state to serial monitor
+        Serial.print("\n Stage 1: ITI"); // Print state to serial monitor
 
         // Timer initialize
         timeWait = ITI;
@@ -119,27 +120,30 @@ void loop() {
         break;
 
       case 2: // LED stimulus ON
-        Serial.println("State 2: LED on"); // Print state to serial monitor
+        Serial.print("\n Stage 2: LED on"); // Print state to serial monitor
 
         // Determine this trial's reward location
-        randInt = random(0, 100);
-        if (randInt <= 50) {
+        randomSeed(millis()); // Make sure this pin is not connected!!
+        randInt = random(100);
+        if (randInt <= Podor) {
           rewardID = 0;
         }
-        else {
+        else if (randInt > Podor){
           rewardID = 1;
         }
+        // Serial.print(randInt); // Show randomly generated number
 
         // Determine if this trial's LED stim is congruent with reward location
-        randInt = random(0, 100);
-        if (randInt < PledCorrect) { // Congruent
+        randInt = random(100);
+        if (randInt <= PledCorrect) { // Congruent
           ledID = rewardID;
-          Serial.println("  Congruent LED stimulus");
+          Serial.print(": Congruent LED stimulus");
         }
-        else { // Not congruent
+        else if (randInt > PledCorrect) { // Not congruent
           ledID = (rewardID+1) % 2;
-          Serial.println("  Incongruent LED stimulus!");
+          Serial.print(": Incongruent LED stimulus!");
         }
+        // Serial.println(randInt); // Show randomly generated number
 
         // Switch on LED
         digitalWrite(ledPins[ledID], HIGH);
@@ -153,7 +157,7 @@ void loop() {
         break;
 
       case 3: // LED stimulus off
-        Serial.println("State 3: LED off"); // Print state to serial monitor
+        Serial.print("\n Stage 3: LED off"); // Print state to serial monitor
         digitalWrite(ledPins[ledID], LOW);
 
         // Timer initialize
@@ -165,7 +169,7 @@ void loop() {
         break;
 
       case 4: // Waiting time between LED offset and reward devlivery
-        Serial.println("State 4: odor delivery delay"); // Print state to serial monitor
+        Serial.print("\n Stage 4: odor delivery delay"); // Print state to serial monitor
 
         // Timer initialize
         timeWait = odorDelay;
@@ -176,8 +180,8 @@ void loop() {
         break;
 
       case 5: // Odor delivery on
-        Serial.print("State 5: odor delivery start. Reward ID: "); // Print state to serial monitor
-        Serial.println(rewardStr[rewardID]); // Print state to serial monitor
+        Serial.print("\n Stage 5: odor delivery start: "); // Print state to serial monitor
+        Serial.print(rewardStr[rewardID]); // Print state to serial monitor
         digitalWrite(odorPin, HIGH);
 
         // Timer initialize
@@ -189,7 +193,7 @@ void loop() {
         break;
 
       case 6: // Odor delivery off
-        Serial.println("State 6: odor delivery end"); // Print state to serial monitor
+        Serial.print("\n Stage 6: odor delivery end"); // Print state to serial monitor
         digitalWrite(odorPin, LOW);
 
         // Timer initialize
@@ -201,7 +205,7 @@ void loop() {
         break;
 
       case 7: // Waiting time between LED offset and reward devlivery
-        Serial.println("State 7: reward delay"); // Print state to serial monitor
+        Serial.print("\n Stage 7: reward delay"); // Print state to serial monitor
 
         // Timer initialize
         timeWait = rewardDelay;
@@ -212,7 +216,7 @@ void loop() {
         break;
 
       case 8: // Reward delivery started
-        Serial.println("State 8: reward delivery start"); // Print state to serial monitor
+        Serial.print("\n Stage 8: reward delivery start"); // Print state to serial monitor
         digitalWrite(rewardPins[rewardID], HIGH);
 
         // Timer initialize
@@ -224,7 +228,7 @@ void loop() {
         break;
 
       case 9: // Reward delivery ended
-        Serial.println("State 9: reward delivery end \n"); // Print state to serial monitor
+        Serial.print("\n Stage 9: reward delivery end \n"); // Print state to serial monitor
         digitalWrite(rewardPins[rewardID], LOW);
 
         // Timer initialize
