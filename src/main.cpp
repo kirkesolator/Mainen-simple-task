@@ -49,10 +49,59 @@ int Preward = 90; // Probability of reward delivery
 int Podor = 50; // Probability odor 1 vs 2 (50 = 50%)
 int state = 1;
 int nextState;
+
+// --------------------------------RSG------------------------------------------
+#include <avr/interrupt.h>
+#include <avr/wdt.h>
+#include <util/atomic.h>
+// The following addresses a problem in version 1.0.5 and earlier of the Arduino IDE
+// that prevents randomSeed from working properly.
+//        https://github.com/arduino/Arduino/issues/575
+#define randomSeed(s) srandom(s)
+
+volatile uint32_t seed;  // These two variables can be reused in your program after the
+volatile int8_t nrot;    // function CreateTrulyRandomSeed()executes in the setup()
+                         // function.
+
+void CreateTrulyRandomSeed()
+{
+  seed = 0;
+  nrot = 32; // Must be at least 4, but more increased the uniformity of the produced
+             // seeds entropy.
+
+  // The following five lines of code turn on the watch dog timer interrupt to create
+  // the seed value
+  cli();
+  MCUSR = 0;
+  _WD_CONTROL_REG |= (1<<_WD_CHANGE_BIT) | (1<<WDE);
+  _WD_CONTROL_REG = (1<<WDIE);
+  sei();
+
+  while (nrot > 0);  // wait here until seed is created
+
+  // The following five lines turn off the watch dog timer interrupt
+  cli();
+  MCUSR = 0;
+  _WD_CONTROL_REG |= (1<<_WD_CHANGE_BIT) | (0<<WDE);
+  _WD_CONTROL_REG = (0<< WDIE);
+  sei();
+}
+
+ISR(WDT_vect)
+{
+  nrot--;
+  seed = seed << 8;
+  seed = seed ^ TCNT1L;
+}
 //---------------------------------SETUP----------------------------------------
 
 void setup() {
+    CreateTrulyRandomSeed(); // Calls the true random seed generator from above
+    randomSeed(seed);
+
+    // Open serial port
     Serial.begin(9600);
+
     pinMode(pokePin, INPUT);
     pinMode(rewardPins[0], OUTPUT);
     pinMode(rewardPins[1], OUTPUT);
@@ -64,6 +113,8 @@ void setup() {
     while (! Serial);
 
     // Verify
+    Serial.print("Random seed generated: ");
+    Serial.println(seed);
     Serial.println("Block start");
 }
 
@@ -123,7 +174,6 @@ void loop() {
         Serial.print("\n Stage 2: LED on"); // Print state to serial monitor
 
         // Determine this trial's reward location
-        randomSeed(millis()); // Make sure this pin is not connected!!
         randInt = random(100);
         if (randInt <= Podor) {
           rewardID = 0;
