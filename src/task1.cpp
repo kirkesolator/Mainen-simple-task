@@ -2,9 +2,9 @@
 
 // Pin indentities
 int pokePin = 9;
-int rewardPins[] = {13,13};
-int odorPin = 13;
-int ledPins[] = {13,13};
+int rewardPins[] = {7,7};
+int odorPin[] = {11,10};
+int ledPins[] = {13,12};
 
 // Pokes
 int pokeState = 1; // Initial poke state
@@ -16,19 +16,19 @@ int pokeOut;
 int randInt;
 
 // ITI
-int ITI = 2000; // Intertrial interval
+int ITI = 3000; // Intertrial interval
 
 // Light stimulus
-int ledDuration = 500; // LED stimulus on time (ms)
+int ledDuration = 1000; // LED stimulus on time (ms)
 int ledID;
 
 // Odor delivery
-int odorDelay = 150;
-int odorDuration = 500;
+int odorDelay = 500;
+int odorDuration = 1000;
 
 // Reward devlivery
 int rewardDelay = 250;
-int rewardDuration = 100;
+int rewardDuration = 10;
 int rewardID;
 char* rewardStr[]={"Left", "Right", "None"};
 
@@ -100,33 +100,34 @@ ISR(WDT_vect)
 //---------------------------------SETUP----------------------------------------
 
 void setup() {
-    CreateTrulyRandomSeed(); // Calls the true random seed generator from above
-    randomSeed(seed);
+  CreateTrulyRandomSeed(); // Calls the true random seed generator from above
+  randomSeed(seed);
 
-    // Open serial port
-    Serial.begin(9600);
+  // Open serial port
+  Serial.begin(9600);
 
-    pinMode(pokePin, INPUT);
-    pinMode(rewardPins[0], OUTPUT);
-    pinMode(rewardPins[1], OUTPUT);
-    pinMode(odorPin, OUTPUT);
-    pinMode(ledPins[0], OUTPUT);
-    pinMode(ledPins[1], OUTPUT);
+  pinMode(pokePin, INPUT);
+  pinMode(rewardPins[0], OUTPUT);
+  pinMode(rewardPins[1], OUTPUT);
+  pinMode(odorPin[0], OUTPUT);
+  pinMode(odorPin[1], OUTPUT);
+  pinMode(ledPins[0], OUTPUT);
+  pinMode(ledPins[1], OUTPUT);
 
-    // Wait with next stage until serial monitor is running
-    while (! Serial);
+  // Wait with next stage until serial monitor is running
+  while (! Serial);
 
-    // Verify
-    Serial.print("\n Mouse ID: ");
-    while (Serial.available() == 0) {}
-    mouseID = Serial.read();
-    Serial.print("\n Human ID: ");
-    while (Serial.available() == 0) {}
-    humanID = Serial.readString();
+  // Verify
+  Serial.print("\n Mouse ID: ");
+  while (Serial.available() == 0) {}
+  mouseID = Serial.parseInt();
+  Serial.print("\n Human ID: ");
+  while (Serial.available() == 0) {}
+  humanID = Serial.readString();
 
-    Serial.print("\n Random seed generated: ");
-    Serial.println(seed);
-    Serial.println("Block start");
+  Serial.print("\n Random seed generated: ");
+  Serial.println(seed);
+  Serial.println("Block start");
 }
 
 //----------------------------------LOOP----------------------------------------
@@ -245,7 +246,7 @@ void loop() {
         Serial.print("\n\t\t\t5: odor delivery start: "); // Print state to serial monitor
         Serial.print(rewardStr[rewardID]); // Print state to serial monitor
         Serial.print("\r");
-        digitalWrite(odorPin, HIGH);
+        digitalWrite(odorPin[rewardID], HIGH);
 
         // Timer initialize
         timeWait = odorDuration;
@@ -257,7 +258,7 @@ void loop() {
 
       case 6: // Odor delivery off
         Serial.print("\n\t\t\t6: odor delivery end\r"); // Print state to serial monitor
-        digitalWrite(odorPin, LOW);
+        digitalWrite(odorPin[rewardID], LOW);
 
         // Timer initialize
         timeWait = 1;
